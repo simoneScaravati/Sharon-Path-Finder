@@ -1,4 +1,4 @@
-// Copyright (C) 2018  Simone Scaravati, Noah Rosa, Stefano Radaelli
+  // Copyright (C) 2018  Simone Scaravati, Noah Rosa, Stefano Radaelli
 
 import netP5.*;
 import oscP5.*;
@@ -209,7 +209,7 @@ void draw() {
           if(punti.size()>1){
             Line l = new Line(punti.get(punti.size()-2), punti.get(punti.size()-1) ); 
             l.drawLine();
-            angle= calcAngle(punti.get(punti.size()-2), punti.get(punti.size()-1));
+            angle= punti.size()<=2 ? calcAngle(punti.get(punti.size()-2), punti.get(punti.size()-1)):  calcAngle(punti.get(punti.size()-3),punti.get(punti.size()-2), punti.get(punti.size()-1));
             angoli.add(angle);
           }else{ //alla creazione del primo punto mette nell'array degli angoli null
             angoli.add((double)0.0);
@@ -238,10 +238,10 @@ void draw() {
 }
   
 public int calcAngle(Point start, Point end){
-  float b = (start.getX()-end.getX());
-  b = b>0? b: -b;   //modulo base
-  float h = (end.getY()- start.getY());
-  h = h>0? h: -h;   // modulo altezza
+  float b = -(start.getX()-end.getX());
+  //b = b>0? b: -b;   //modulo base
+  float h = -(end.getY()- start.getY());
+  //h = h>0? h: -h;   // modulo altezza
   //double div = (double)h/b;
   double angle = atan2(h,b);    //il metodo di Math ritorna theta avendo come parametri x e y del triangolo
   double deg = Math.toDegrees(angle);
@@ -249,6 +249,25 @@ public int calcAngle(Point start, Point end){
   return (int)deg;
 }
 
+public int calcAngle(Point before, Point start, Point end){
+  float b2 = -(start.getX()-end.getX());
+  //b = b>0? b: -b;   //modulo base
+  float h2 = -(end.getY()- start.getY());
+  //h = h>0? h: -h;   // modulo altezza
+  float b1 = -(before.getX()-start.getX());
+  //b = b>0? b: -b;   //modulo base
+  float h1 = -(start.getY()- before.getY());
+  //h = h>0? h: -h;   // modulo altezza
+  //double div = (double)h/b;
+  double angle = atan2(h2,b2);    //il metodo di Math ritorna theta avendo come parametri x e y del triangolo
+  double beforeag = atan2(h1,b1); 
+  double deg = Math.toDegrees(angle);
+  double beforedg = Math.toDegrees(beforeag);
+  deg = deg - beforedg;
+  deg = deg%180;
+  angoli.add(deg);
+  return (int)deg;
+}
 public void keyPressed(){
   if(state < 2){
     state++;
