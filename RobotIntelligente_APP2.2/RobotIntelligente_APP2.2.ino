@@ -94,17 +94,17 @@ void loop() {
         avanti();
       } 
       if(dist<15 && dist!=0) {
-        indietroDestra();
+        avantiDestra();
         delay(850);
         stopp();
         delay(5);
         dist=sonar.ping_cm();
-        indietroSinistra();
+        avantiSinistra();
         delay(1700);
         stopp();
         delay(5);
         if((dist>sonar.ping_cm() && sonar.ping_cm()!=0) || (dist==0 && sonar.ping_cm()!=0)) {
-          indietroDestra();
+          avantiDestra();
           delay(1700);
         }
       }
@@ -194,7 +194,7 @@ void routed(OSCMessage &messageIN, int addrOffset) {
   int angoloGiri;
   
   for(int i=0; i < lungArray; i++){
-      angle = messageIn.getInt(2*i+1);
+      angle = messageIN.getInt(2*i+1);
       if(angle >= 0){
         angoloGiri= map(angle, 0,180, 1, giri180deg);
         sinistraComposite(angoloGiri);
@@ -203,7 +203,7 @@ void routed(OSCMessage &messageIN, int addrOffset) {
         angoloGiri= map(angle, -1,-180, 1, giri180deg);
         destraComposite(angoloGiri);
       }
-    distance = messageIn.getInt(2*i+2);
+    distance = messageIN.getInt(2*i+2);
     distanzaGiri= map(distance, 1, maxDistanzaSchermo, 1, maxGiri);  // mapping della distanza con i giri delle route
     avantiComposite(distanzaGiri);
     }
