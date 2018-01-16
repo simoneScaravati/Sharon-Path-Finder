@@ -22,8 +22,9 @@ int giroD=0;
 int giroS=0;
 int modalita = 0;
 
+
+
 boolean mod=false;
-boolean wheels= false;
 
 const String ssid="FASTWEB-1-Scara";
 const String pass="SCARAnet@456";
@@ -112,9 +113,13 @@ void loop() {
     case 2: indietro(); break;
     case 3: avantiDestra(); break;
     case 4: avantiSinistra(); break;
+    
+    /*case 5: avantiComposite(); break;
+    case 6: destraComposite(); break;
+    case 7: sinistraComposite(); break;*/
   }
 
-  if(modalita==1){
+  if(modalita==1 /*|| modalita== 5*/){
     if (giroS>giroD){
       if (powerD<1020)
         powerD+=1;
@@ -142,9 +147,6 @@ void loop() {
 }
 
 void receiveOSC() {
-    //Serial.println(btnState);
-
-    //OSCBundle bundleIN; // NO
     OSCMessage messageIN;
     int size;
     if( (size = Udp.parsePacket())> 0) {
@@ -153,23 +155,17 @@ void receiveOSC() {
         messageIN.fill(packetBuffer,size);
         
         if(!messageIN.hasError()) {
-            Serial.println("----------->  no error");
+            //Serial.println("----------->  no error");
             //Serial.println();
             messageIN.send(Serial);
             if(mod == false){
               messageIN.route("/UP", avanti);
               messageIN.route("/DOWN", indietro);
-                if(wheels == false){
-                  messageIN.route("/LEFT", avantiSinistra);
-                  messageIN.route("/RIGHT", avantiDestra);
-                }else{
-                  messageIN.route("/LEFT", indietroSinistra);
-                  messageIN.route("/RIGHT", indietroDestra);
-                }
+              messageIN.route("/LEFT", avantiSinistra);
+              messageIN.route("/RIGHT", avantiDestra);
+              messageIN.route("/ROUTE", routed); 
               messageIN.route("/STOP", stopp);
               messageIN.route("/ai", AI);
-              messageIN.route("/4x4", wheelsON);
-              messageIN.route("/2x4", wheelsOFF);
             }else{
               messageIN.route("/manual", manual);
             }       
@@ -187,14 +183,6 @@ void manual(OSCMessage &messageIN, int addrOffset){
   stopp();
 }
 
-void wheelsOFF(OSCMessage &messageIN, int addrOffset){
-  wheels=true;
-}
-
-void wheelsON(OSCMessage &messageIN, int addrOffset){
-  wheels=false;
-}
-
 void avanti(OSCMessage &messageIN, int addrOffset) {
   modalita=1;
   giroS=giroD=0;
@@ -207,6 +195,40 @@ void avanti() {
   digitalWrite(pinI4,LOW);
   digitalWrite(pinI3,HIGH);
 }
+
+void routed(OSCMessage &messageIN, int addrOffset) {
+  int lungArray=messageIN.getInt(0);
+  int angle;
+  int distance;
+  for(int i=0; i < lungArray; i++){
+      angle = messageIn.getInt(2*i+1);
+      if(angle >= 0)
+        sinistraComposite(angle);
+      if(angle < 0){
+        destraComposite(angle);
+      }
+    distance = messageIn.getInt(2*i+2);
+    distanzaGiri= map(distance, 1, 1200, 1, 60);  // mapping della distanza dai giri
+    avantiComposite(distanzaGiri);
+    }
+  }
+
+
+void avantiComposite(int dist) {
+  while( giroS<distanzaGiri && giroD< distanzaGiri){
+      avanti();
+    }
+  stopp();
+}
+
+void destraComposite(int angle) {
+  ;
+}
+
+void sinistraComposite(int angle) {
+ ;
+}
+
 
 
 void indietro(OSCMessage &messageIN, int addrOffset) {
@@ -229,8 +251,8 @@ void avantiDestra() {
   analogWrite(speedpin,1023);//input a value to set the speed
   digitalWrite(pinI2,LOW);
   digitalWrite(pinI1,HIGH);
-  analogWrite(speedpin1,0);//input a value to set the speed
-  digitalWrite(pinI4,LOW);
+  analogWrite(speedpin1,1023);//input a value to set the speed
+  digitalWrite(pinI4,HIGH);
   digitalWrite(pinI3,LOW);
 }
 
@@ -239,15 +261,35 @@ void avantiSinistra(OSCMessage &messageIN, int addrOffset) {
   modalita=4;
 }
 void avantiSinistra() {
-  analogWrite(speedpin, 0);//input a value to set the speed
+  /*analogWrite(speedpin, 0);//input a value to set the speed
   digitalWrite(pinI2,LOW);
+  digitalWrite(pinI1,LOW);
+  analogWrite(speedpin1,1023);//input a value to set the speed
+  digitalWrite(pinI4,LOW);
+  digitalWrite(pinI3,HIGH);*/
+  analogWrite(speedpin,1023);//input a value to set the speed
+  digitalWrite(pinI2,HIGH);
   digitalWrite(pinI1,LOW);
   analogWrite(speedpin1,1023);//input a value to set the speed
   digitalWrite(pinI4,LOW);
   digitalWrite(pinI3,HIGH);
 }
 
-void indietroDestra(OSCMessage &messageIN, int addrOffset) {
+
+void stopp(OSCMessage &messageIN, int addrOffset) {
+  modalita=0;
+}
+void stopp() {
+  analogWrite(speedpin,0);//input a value to set the speed
+  digitalWrite(pinI2,LOW);
+  digitalWrite(pinI1,HIGH);
+  analogWrite(speedpin1,0);//input a value to set the speed
+  digitalWrite(pinI4,LOW);
+  digitalWrite(pinI3,HIGH);
+}
+
+
+/*void indietroDestra(OSCMessage &messageIN, int addrOffset) {
   //modalita=3;
 }
 void indietroDestra() {
@@ -275,20 +317,10 @@ void indietroSinistra() {
   analogWrite(speedpin1,1023);//input a value to set the speed
   digitalWrite(pinI4,LOW);
   digitalWrite(pinI3,HIGH);
-}
+}*/
 
 
-void stopp(OSCMessage &messageIN, int addrOffset) {
-  modalita=0;
-}
-void stopp() {
-  analogWrite(speedpin,0);//input a value to set the speed
-  digitalWrite(pinI2,LOW);
-  digitalWrite(pinI1,HIGH);
-  analogWrite(speedpin1,0);//input a value to set the speed
-  digitalWrite(pinI4,LOW);
-  digitalWrite(pinI3,HIGH);
-}
+
 
 
 
