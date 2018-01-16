@@ -1,3 +1,5 @@
+// Copyright (C) 2018  Simone Scaravati, Noah Rosa, Stefano Radaelli
+
 
 #include <NewPing.h>
 #include <ESP8266WiFi.h>

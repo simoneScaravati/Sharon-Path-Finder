@@ -25,7 +25,10 @@ int modalita = 0;
 boolean mod=false;
 boolean wheels= false;
 
-const String ssid="noah-HP-15-Notebook-PC";
+const String ssid="FASTWEB-1-Scara";
+const String pass="SCARAnet@456";
+
+/*const String ssid="noah-HP-15-Notebook-PC";
 const String pass="BJkd9jw4";
 
 /*const String ssid="HUAWEI P8 lite 2017";
@@ -45,7 +48,7 @@ pinMode(pinI3,OUTPUT);//define this port as output
 pinMode(pinI4,OUTPUT);
 pinMode(speedpin1,OUTPUT);
 pinMode(D8, INPUT);  // GPIO15
-pinMode(3, INPUT);
+pinMode(3, INPUT);   //GPIO3 = Rx Node
 attachInterrupt(digitalPinToInterrupt(D8), girS, RISING);
 attachInterrupt(digitalPinToInterrupt(3), girD, RISING);
 
@@ -66,7 +69,6 @@ Serial.println(WiFi.localIP());
 //setup ethernet part
 Udp.begin(8000); // porta default OSC
 
-
 }
 
 void girS(){
@@ -80,16 +82,9 @@ void girD(){
   }
 
 
-
-
 void loop() {
   receiveOSC();
-  /*if(giroS==0 && digitalRead(D8)==1){
-  Serial.println("giroS");
-  }
-  if(giroD==0 && digitalRead(3)==1){
-  Serial.println("giroD");
-  }*/
+
   if(mod== true){
     dist = sonar.ping_cm();
       if(dist>=15 || dist==0) {
@@ -115,34 +110,35 @@ void loop() {
     case 0: stopp(); break;
     case 1: avanti(); break;
     case 2: indietro(); break;
-    case 3: destra(); break;
-    case 4: sinistra(); break;
+    case 3: avantiDestra(); break;
+    case 4: avantiSinistra(); break;
   }
 
-
-  if (giroS>giroD){
-    if (powerD<1020)
-      powerD+=1;
-    else
-      powerS-=1;
-    }
-  else if (giroD>giroS){
-    if (powerS<1020)
-      powerS+=1;
-    else
-      powerD-=1;
-    }
-    if (powerS<970)
-      powerS=970;
-    if (powerD<970)
-      powerD=970;
-    Serial.print(giroS);
-    Serial.print(",");
-    Serial.print(giroD);
-    Serial.print(",");
-    Serial.print(powerS);
-    Serial.print(",");
-    Serial.println(powerD);
+  if(modalita==1){
+    if (giroS>giroD){
+      if (powerD<1020)
+        powerD+=1;
+      else
+        powerS-=1;
+      }
+    else if (giroD>giroS){
+      if (powerS<1020)
+        powerS+=1;
+      else
+        powerD-=1;
+      }
+      if (powerS<970)
+        powerS=970;
+      if (powerD<970)
+        powerD=970;
+      Serial.print(giroS);
+      Serial.print(",");
+      Serial.print(giroD);
+      Serial.print(",");
+      Serial.print(powerS);
+      Serial.print(",");
+      Serial.println(powerD);
+  }
 }
 
 void receiveOSC() {
@@ -151,11 +147,7 @@ void receiveOSC() {
     //OSCBundle bundleIN; // NO
     OSCMessage messageIN;
     int size;
-    if( (size = Udp.parsePacket())>0) {
-        //pingLed();
-        //oscLastPacketTime=millis();
-        //Serial.println("received");
-        //Serial.printf("Received %d bytes from %s, port %d\n", size, Udp.remoteIP().toString().c_str(), Udp.remotePort());
+    if( (size = Udp.parsePacket())> 0) {
         
         Udp.read(packetBuffer,size);
         messageIN.fill(packetBuffer,size);
@@ -205,6 +197,7 @@ void wheelsON(OSCMessage &messageIN, int addrOffset){
 
 void avanti(OSCMessage &messageIN, int addrOffset) {
   modalita=1;
+  giroS=giroD=0;
 }
 void avanti() {
   analogWrite(speedpin,powerS);//input a value to set the speed
@@ -217,12 +210,6 @@ void avanti() {
 
 
 void indietro(OSCMessage &messageIN, int addrOffset) {
-  /*analogWrite(speedpin,1023);//input a value to set the speed
-  digitalWrite(pinI2,HIGH);
-  digitalWrite(pinI1,LOW);
-  analogWrite(speedpin1,1023);//input a value to set the speed
-  digitalWrite(pinI4,HIGH);
-  digitalWrite(pinI3,LOW);*/
   modalita= 2;
 }
 void indietro() {
@@ -242,54 +229,27 @@ void avantiDestra() {
   analogWrite(speedpin,1023);//input a value to set the speed
   digitalWrite(pinI2,LOW);
   digitalWrite(pinI1,HIGH);
-  analogWrite(speedpin1,300);//input a value to set the speed
+  analogWrite(speedpin1,0);//input a value to set the speed
   digitalWrite(pinI4,LOW);
-  digitalWrite(pinI3,HIGH);
+  digitalWrite(pinI3,LOW);
 }
 
 
 void avantiSinistra(OSCMessage &messageIN, int addrOffset) {
   modalita=4;
 }
-void avantiSinistra(OSCMessage &messageIN, int addrOffset) {
-  analogWrite(speedpin, 128);//input a value to set the speed
+void avantiSinistra() {
+  analogWrite(speedpin, 0);//input a value to set the speed
   digitalWrite(pinI2,LOW);
-  digitalWrite(pinI1,HIGH);
+  digitalWrite(pinI1,LOW);
   analogWrite(speedpin1,1023);//input a value to set the speed
   digitalWrite(pinI4,LOW);
   digitalWrite(pinI3,HIGH);
 }
-
-
-void stopp(OSCMessage &messageIN, int addrOffset) {
-  /*analogWrite(speedpin,0);//input a value to set the speed
-  digitalWrite(pinI2,LOW);
-  digitalWrite(pinI1,HIGH);
-  analogWrite(speedpin1,0);//input a value to set the speed
-  digitalWrite(pinI4,LOW);
-  digitalWrite(pinI3,HIGH);*/
-  modalita=0;
-}
-
-void stopp() {
-  analogWrite(speedpin,0);//input a value to set the speed
-  digitalWrite(pinI2,LOW);
-  digitalWrite(pinI1,HIGH);
-  analogWrite(speedpin1,0);//input a value to set the speed
-  digitalWrite(pinI4,LOW);
-  digitalWrite(pinI3,HIGH);
-}
-
 
 void indietroDestra(OSCMessage &messageIN, int addrOffset) {
-  analogWrite(speedpin,1023);//input a value to set the speed
-  digitalWrite(pinI2,LOW);
-  digitalWrite(pinI1,HIGH);
-  analogWrite(speedpin1,1023);//input a value to set the speed
-  digitalWrite(pinI4,HIGH);
-  digitalWrite(pinI3,LOW);
+  //modalita=3;
 }
-
 void indietroDestra() {
   analogWrite(speedpin,1023);//input a value to set the speed
   digitalWrite(pinI2,LOW);
@@ -316,4 +276,22 @@ void indietroSinistra() {
   digitalWrite(pinI4,LOW);
   digitalWrite(pinI3,HIGH);
 }
+
+
+void stopp(OSCMessage &messageIN, int addrOffset) {
+  modalita=0;
+}
+void stopp() {
+  analogWrite(speedpin,0);//input a value to set the speed
+  digitalWrite(pinI2,LOW);
+  digitalWrite(pinI1,HIGH);
+  analogWrite(speedpin1,0);//input a value to set the speed
+  digitalWrite(pinI4,LOW);
+  digitalWrite(pinI3,HIGH);
+}
+
+
+
+
+
 
