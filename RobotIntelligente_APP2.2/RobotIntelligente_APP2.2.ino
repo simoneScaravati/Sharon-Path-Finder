@@ -22,7 +22,9 @@ int giroD=0;
 int giroS=0;
 int modalita = 0;
 
-
+int giri180deg= 8;
+int maxDistanzaSchermo= 1200;
+int maxGiri=60;
 
 boolean mod=false;
 
@@ -183,6 +185,30 @@ void manual(OSCMessage &messageIN, int addrOffset){
   stopp();
 }
 
+
+void routed(OSCMessage &messageIN, int addrOffset) {
+  int lungArray=messageIN.getInt(0);
+  int angle;
+  int distance;
+  int distanzaGiri;
+  int angoloGiri;
+  
+  for(int i=0; i < lungArray; i++){
+      angle = messageIn.getInt(2*i+1);
+      if(angle >= 0){
+        angoloGiri= map(angle, 0,180, 1, giri180deg);
+        sinistraComposite(angoloGiri);
+      }
+      if(angle < 0){
+        angoloGiri= map(angle, -1,-180, 1, giri180deg);
+        destraComposite(angoloGiri);
+      }
+    distance = messageIn.getInt(2*i+2);
+    distanzaGiri= map(distance, 1, maxDistanzaSchermo, 1, maxGiri);  // mapping della distanza con i giri delle route
+    avantiComposite(distanzaGiri);
+    }
+  }
+
 void avanti(OSCMessage &messageIN, int addrOffset) {
   modalita=1;
   giroS=giroD=0;
@@ -196,39 +222,32 @@ void avanti() {
   digitalWrite(pinI3,HIGH);
 }
 
-void routed(OSCMessage &messageIN, int addrOffset) {
-  int lungArray=messageIN.getInt(0);
-  int angle;
-  int distance;
-  for(int i=0; i < lungArray; i++){
-      angle = messageIn.getInt(2*i+1);
-      if(angle >= 0)
-        sinistraComposite(angle);
-      if(angle < 0){
-        destraComposite(angle);
-      }
-    distance = messageIn.getInt(2*i+2);
-    distanzaGiri= map(distance, 1, 1200, 1, 60);  // mapping della distanza dai giri
-    avantiComposite(distanzaGiri);
-    }
-  }
-
-
 void avantiComposite(int dist) {
-  while( giroS<distanzaGiri && giroD< distanzaGiri){
+  modalita=1;
+  giroS=giroD=0;
+  while( giroS<dist && giroD< dist){
       avanti();
     }
   stopp();
 }
 
 void destraComposite(int angle) {
-  ;
+  modalita=3;
+  giroS=giroD=0;
+  while(giroD< angle){
+      avantiDestra();
+    }
+  stopp();
 }
 
 void sinistraComposite(int angle) {
- ;
+   modalita=4;
+   giroS=giroD=0;
+   while(giroS< angle){
+        avantiSinistra();
+      }
+    stopp();
 }
-
 
 
 void indietro(OSCMessage &messageIN, int addrOffset) {
@@ -242,7 +261,6 @@ void indietro() {
   digitalWrite(pinI4,HIGH);
   digitalWrite(pinI3,LOW);
 }
-
 
 void avantiDestra(OSCMessage &messageIN, int addrOffset) {
   modalita=3;
