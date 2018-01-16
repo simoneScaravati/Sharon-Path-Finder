@@ -13,6 +13,7 @@ public int port= 0;
 static int cName = 1;      // variabile sequenziale che dà il nome al Point
 static ArrayList<Point> punti = new ArrayList();  // array di Point
 static ArrayList<Double> angoli = new ArrayList();  //array degli angoli tra un punto e un altro
+static ArrayList<Integer> distanze = new ArrayList(); //array delle distanze tra un punto e un altro
 Button reset, calculate, settings,start,back,exit;
 String messageRun ="";
 
@@ -189,11 +190,21 @@ void draw() {
             //to do....
             try{
             messageRun = "Elaborating...";
-            msg= new OscMessage("/UP");
+            msg= new OscMessage("/ROUTE");
+            int angleSize = angoli.size();
+            msg.add(angleSize);
+            for (int i =0; i<angleSize; i++){
+              msg.add(angoli.get(i).intValue());
+              msg.add(distanze.get(i));
+            }
+            oscP5.send(msg, net);
+            /*msg= new OscMessage("/UP");
             oscP5.send(msg,net);
             delay(3000);
             msg = new OscMessage("/STOP");
             oscP5.send(msg,net);
+            */
+            
             }catch(NullPointerException e){
               messageRun = "Trasmission Error! \n(Probably ip and/or port aren't correct)";
             }
@@ -211,19 +222,21 @@ void draw() {
             l.drawLine();
             angle= punti.size()<=2 ? calcAngle(punti.get(punti.size()-2), punti.get(punti.size()-1)):  calcAngle(punti.get(punti.size()-3),punti.get(punti.size()-2), punti.get(punti.size()-1));
             angoli.add(angle);
-          }else{ //alla creazione del primo punto mette nell'array degli angoli null
+            int distanza = getDistance(punti.get(punti.size()-2), punti.get(punti.size()-1));
+            distanze.add(distanza);
+          }/*else{ //alla creazione del primo punto mette nell'array degli angoli null
             angoli.add((double)0.0);
-          }
+          }*/
           //stampe nomi e numeri
           textAlign(LEFT);
           textSize(width/80);  //dimensione dinamica del font
           if(mouseX>width/2){   // print destra o sinistra del nome dei punti
             text(p.toString(), mouseX+15, mouseY+5);
-            if(angoli.size()>1)  //stampa l'angolo solo se l'array non è vuoto
+            if(angoli.size()>=1)  //stampa l'angolo solo se l'array non è vuoto
               text(angle+"°", mouseX+15, mouseY+20);
           }else{
             text(p.toString(), mouseX-80, mouseY+5);
-            if(angoli.size()>1)  //stampa l'angolo solo se l'array non è vuoto
+            if(angoli.size()>=1)  //stampa l'angolo solo se l'array non è vuoto
               text(angle+"°", mouseX-80, mouseY+20);
           }
         
@@ -231,9 +244,6 @@ void draw() {
         cName++;   // incrementa int per il nome dei punti
       }
       
-      else{
-        ; // sta cippa di minchia
-      }
    }
 }
   
@@ -265,9 +275,21 @@ public int calcAngle(Point before, Point start, Point end){
   double beforedg = Math.toDegrees(beforeag);
   deg = deg - beforedg;
   deg = deg%180;
-  angoli.add(deg);
+  //angoli.add(deg);
   return (int)deg;
 }
+
+public int getDistance (Point start, Point end){
+  double distanza;
+  float b = -(start.getX()-end.getX());
+  b = b>0? b: -b;   //modulo base
+  float h = -(end.getY()- start.getY());
+  h = h>0? h: -h;   // modulo altezza
+  distanza= Math.sqrt(Math.pow(b,2)+Math.pow(h,2));
+  return (int)distanza;
+  
+}
+
 public void keyPressed(){
   if(state < 2){
     state++;
