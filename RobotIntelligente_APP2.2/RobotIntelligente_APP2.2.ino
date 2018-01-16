@@ -28,6 +28,9 @@ int maxGiri=60;
 
 boolean mod=false;
 
+/*const String ssid="OnePlus 5T";
+const String pass="12345678";*/
+
 const String ssid="FASTWEB-1-Scara";
 const String pass="SCARAnet@456";
 
@@ -37,7 +40,7 @@ const String pass="BJkd9jw4";
 /*const String ssid="HUAWEI P8 lite 2017";
 const String pass="ciaonoah123";*/
 
-const byte MAX_MSG_SIZE PROGMEM=100;
+const byte MAX_MSG_SIZE PROGMEM=500000000;
 byte packetBuffer[MAX_MSG_SIZE];  //buffer to hold incoming udp packet
 WiFiUDP Udp;
 
@@ -187,6 +190,15 @@ void manual(OSCMessage &messageIN, int addrOffset){
 
 
 void routed(OSCMessage &messageIN, int addrOffset) {
+  
+  /* 
+   *  DA MODIFICARE: IL MESSAGE "/ROUTE" SARÀ SOLO UN SEGNALE ATOMICO
+   *  PER FAR CAPIRE AD ARDUINO CHE DOVRÀ SPACCHETTARE UN BUNDLE 
+   *  NEL QUALE, SE TUTTO VA BENE, CI SARANNO VARI OSC MESSAGE, inizializzati con "/route" CHE RIPORTERANNO DI VOLTA IN
+   *  VOLTA ANGOLO E DISTANZA
+   */
+
+  
   int lungArray=messageIN.getInt(0);
   int angle;
   int distance;
@@ -210,7 +222,7 @@ void routed(OSCMessage &messageIN, int addrOffset) {
   }
 
 void avanti(OSCMessage &messageIN, int addrOffset) {
-  modalita=1;
+  modalita=1; 
   giroS=giroD=0;
 }
 void avanti() {

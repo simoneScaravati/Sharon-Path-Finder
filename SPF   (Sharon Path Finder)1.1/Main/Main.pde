@@ -186,16 +186,22 @@ void draw() {
             text(messageRun, (calculate.getPosX()+ (calculate.getX()/2)), (calculate.getPosY()+ calculate.getY() + 30 ));
             delay(50);
             
-            //interazioni con arduino 
-            //to do....
+            //interazioni con arduino/node
             try{
             messageRun = "Elaborating...";
+            
+            /* TODO:
+            INVECE di creare messaggi, si crea un oscBundle composto da tanti oscMessage
+            ogni message inizierà con "route" e avrà i due argomenti: angolo e distanza
+            e infine si invierà il bundle e basta, sarà arduino a spacchettarlo
+            */
+            
             msg= new OscMessage("/ROUTE");
             int angleSize = angoli.size();
             msg.add(angleSize);
             for (int i =0; i<angleSize; i++){
               msg.add(angoli.get(i).intValue());
-              msg.add(distanze.get(i));
+              msg.add(distanze.get(i).intValue());
             }
             oscP5.send(msg, net);
             /*msg= new OscMessage("/UP");
@@ -255,7 +261,7 @@ public int calcAngle(Point start, Point end){
   //double div = (double)h/b;
   double angle = atan2(h,b);    //il metodo di Math ritorna theta avendo come parametri x e y del triangolo
   double deg = Math.toDegrees(angle);
-  angoli.add(deg);
+  //angoli.add(deg);
   return (int)deg;
 }
 
