@@ -6,6 +6,7 @@ import java.lang.Math;
 
 public OscP5 oscP5;
 OscMessage msg;
+OscBundle bundle;
 public NetAddress net;
 public String ip_address="";
 public int port= 0;
@@ -40,7 +41,7 @@ void setup(){
 }
 void settings() {
   
-  //size(1000,700);  //finestra schermo intero
+  //size(1000,700);  //finestra 
   fullScreen();
 }
 
@@ -190,29 +191,30 @@ void draw() {
             try{
             messageRun = "Elaborating...";
             
-            /* TODO:
-            INVECE di creare messaggi, si crea un oscBundle composto da tanti oscMessage
-            ogni message inizierà con "route" e avrà i due argomenti: angolo e distanza
-            e infine si invierà il bundle e basta, sarà arduino a spacchettarlo
-            */
-            
             msg= new OscMessage("/ROUTE");
             int angleSize = angoli.size();
             msg.add(angleSize);
             for (int i =0; i<angleSize; i++){
+   
+              /*sb = new StringBuilder();
+              sb.append("/route ");
+              sb.append((angoli.get(i).intValue()));
+              sb.append(" ");
+              sb.append((distanze.get(i).intValue()));
+              bundle.add(new OscMessage(sb.toString()));*/
+              
               msg.add(angoli.get(i).intValue());
               msg.add(distanze.get(i).intValue());
             }
+            //oscP5.send(bundle, net);
+            
             oscP5.send(msg, net);
-            /*msg= new OscMessage("/UP");
-            oscP5.send(msg,net);
-            delay(3000);
-            msg = new OscMessage("/STOP");
-            oscP5.send(msg,net);
-            */
+            /*delay(angleSize*200);
+            messageRun = "DONE";*/
             
             }catch(NullPointerException e){
               messageRun = "Trasmission Error! \n(Probably ip and/or port aren't correct)";
+              e.printStackTrace();
             }
           }
       }

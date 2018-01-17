@@ -17,16 +17,23 @@ int powerD = 1020;
 #define TRIGGER D3 // GPIO0
 #define ECHO D4 // GPIO2
 NewPing sonar(TRIGGER, ECHO, 400);
+
+
 int dist=0;
 int giroD=0;
 int giroS=0;
 int modalita = 0;
-
 int giri180deg= 8;
 int maxDistanzaSchermo= 1200;
-int maxGiri=60;
+int maxGiri=50;
 
 boolean mod=false;
+//int angoli[100];
+//int distanze[100];
+
+
+boolean receivedRoute= false;
+int lungArray;
 
 /*const String ssid="OnePlus 5T";
 const String pass="12345678";*/
@@ -40,13 +47,13 @@ const String pass="BJkd9jw4";
 /*const String ssid="HUAWEI P8 lite 2017";
 const String pass="ciaonoah123";*/
 
-const byte MAX_MSG_SIZE PROGMEM=500000000;
+const byte MAX_MSG_SIZE PROGMEM=10000;
 byte packetBuffer[MAX_MSG_SIZE];  //buffer to hold incoming udp packet
 WiFiUDP Udp;
 
+
 void setup() {
 Serial.begin(115200);
-
 pinMode(pinI1,OUTPUT);//define this port as output
 pinMode(pinI2,OUTPUT);
 pinMode(speedpin,OUTPUT);
@@ -118,37 +125,38 @@ void loop() {
     case 2: indietro(); break;
     case 3: avantiDestra(); break;
     case 4: avantiSinistra(); break;
-    
-    /*case 5: avantiComposite(); break;
-    case 6: destraComposite(); break;
-    case 7: sinistraComposite(); break;*/
   }
 
-  if(modalita==1 /*|| modalita== 5*/){
-    if (giroS>giroD){
-      if (powerD<1020)
-        powerD+=1;
-      else
-        powerS-=1;
-      }
-    else if (giroD>giroS){
-      if (powerS<1020)
-        powerS+=1;
-      else
-        powerD-=1;
-      }
-      if (powerS<970)
-        powerS=970;
-      if (powerD<970)
-        powerD=970;
-      Serial.print(giroS);
-      Serial.print(",");
-      Serial.print(giroD);
-      Serial.print(",");
-      Serial.print(powerS);
-      Serial.print(",");
-      Serial.println(powerD);
-  }
+  calibrate();
+  
+}
+
+void calibrate(){
+  if(modalita==1 || modalita== 5){
+      if (giroS>giroD){
+        if (powerD<1020)
+          powerD+=1;
+        else
+          powerS-=1;
+        }
+      else if (giroD>giroS){
+        if (powerS<1020)
+          powerS+=1;
+        else
+          powerD-=1;
+        }
+        if (powerS<970)
+          powerS=970;
+        if (powerD<970)
+          powerD=970;
+        Serial.print(giroS);
+        Serial.print(",");
+        Serial.print(giroD);
+        Serial.print(",");
+        Serial.print(powerS);
+        Serial.print(",");
+        Serial.println(powerD);
+    }
 }
 
 void receiveOSC() {
@@ -198,28 +206,51 @@ void routed(OSCMessage &messageIN, int addrOffset) {
    *  VOLTA ANGOLO E DISTANZA
    */
 
+  //receivedRoute= true;
   
-  int lungArray=messageIN.getInt(0);
+  lungArray=messageIN.getInt(0);
+
   int angle;
   int distance;
   int distanzaGiri;
   int angoloGiri;
+  Serial.println("Lung. array ");
+  Serial.println(lungArray);
   
   for(int i=0; i < lungArray; i++){
-      angle = messageIN.getInt(2*i+1);
-      if(angle >= 0){
-        angoloGiri= map(angle, 0,180, 1, giri180deg);
-        sinistraComposite(angoloGiri);
-      }
-      if(angle < 0){
-        angoloGiri= map(angle, -1,-180, 1, giri180deg);
-        destraComposite(angoloGiri);
-      }
-    distance = messageIN.getInt(2*i+2);
-    distanzaGiri= map(distance, 1, maxDistanzaSchermo, 1, maxGiri);  // mapping della distanza con i giri delle route
-    avantiComposite(distanzaGiri);
-    }
-  }
+        angle = messageIN.getInt(2*i+1);
+        distance = messageIN.getInt(2*i+2);
+        //angoli[i] = angle;
+        if(angle >= 0){
+          angoloGiri= map(angle, 0,180, 1, giri180deg);
+          Serial.println("angolo positivo ");
+          Serial.println(angle);
+          Serial.println("angolo giri ");
+          Serial.println(angoloGiri);
+          sinistraComposite(angoloGiri);
+        }
+        if(angle < 0){
+          angoloGiri= map(angle, -1,-180, 1, giri180deg);
+          Serial.println("angolo negativo ");
+          Serial.println(angle);
+          Serial.println("angolo giri ");
+          Serial.println(angoloGiri);
+          destraComposite(angoloGiri);
+        }
+      //distanze[i]= distance;
+      
+      Serial.println("distanza ");
+      Serial.println(distance);
+      distanzaGiri= map(distance, 1, maxDistanzaSchermo, 1, maxGiri);  // mapping della distanza con i giri delle route
+      Serial.println("distanzagiri ");
+      Serial.println(distanzaGiri);
+      avantiComposite(distanzaGiri);
+      Serial.println("Ora dovrebbe ritornare all'inizio del loop");
+   }
+  Serial.println("STOP, fine circuito! ");
+  stopp();
+}
+
 
 void avanti(OSCMessage &messageIN, int addrOffset) {
   modalita=1; 
@@ -234,13 +265,15 @@ void avanti() {
   digitalWrite(pinI3,HIGH);
 }
 
-void avantiComposite(int dist) {
-  modalita=1;
+void avantiComposite(int distanzaAvanti) {
+  modalita=5;  
   giroS=giroD=0;
-  while( giroS<dist && giroD< dist){
+  while( distanzaAvanti>=giroS || distanzaAvanti>=giroD){
+      ESP.wdtFeed();
       avanti();
+      calibrate();
     }
-  stopp();
+  modalita=0;
 }
 
 void destraComposite(int angle) {
