@@ -1,0 +1,78 @@
+{
+contents: [
+{
+	type:"button",
+	defaultFillColor: [0, 0, 60],
+	height: 100,
+	pressedFillColor: [255, 9, 0],
+	borderColor: [255, 0, 0],
+	fontColor: [255, 255, 255],
+	text: "∆",
+	rect: [505, 55, 605, 155],
+	width: 100,
+	oscButtonPressed: "/UP"
+},
+{
+	type:"button",
+	defaultFillColor: [0, 0, 60],
+	height: 100,
+	pressedFillColor: [255, 9, 0],
+	borderColor: [255, 0, 0],
+	fontColor: [255, 255, 255],
+	text: "<<",
+	rect: [387, 157, 487, 257],
+	width: 100,
+	oscButtonPressed: "/LEFT"
+},
+{
+	type:"button",
+	defaultFillColor: [0, 0, 60],
+	height: 100,
+	pressedFillColor: [255, 9, 0],
+	borderColor: [255, 0, 0],
+	fontColor: [255, 255, 255],
+	text: ">>",
+	rect: [618, 155, 718, 255],
+	width: 100,
+	oscButtonPressed: "/RIGHT"
+},
+{
+	type:"button",
+	defaultFillColor: [0, 0, 60],
+	height: 100,
+	pressedFillColor: [255, 9, 0],
+	borderColor: [255, 0, 0],
+	fontColor: [255, 255, 255],
+	text: "✓",
+	rect: [499, 269, 599, 369],
+	width: 100,
+	oscButtonPressed: "/DOWN"
+},
+{
+	type:"button",
+	defaultFillColor: [0, 0, 60],
+	height: 100,
+	pressedFillColor: [255, 9, 0],
+	borderColor: [255, 0, 0],
+	fontColor: [255, 255, 255],
+	text: "STOP",
+	rect: [816, 24, 916, 124],
+	width: 100,
+	oscButtonPressed: "/STOP"
+},
+{
+	type:"toggle",
+	defaultFillColor: [229, 0, 0],
+	defaultText: "MANUAL",
+	fontColor: [255, 255, 255],
+	borderColor: [255, 255, 255],
+	height: 266,
+	toggledFillColor: [22, 158, 0],
+	toggledText: "AI",
+	width: 144,
+	rect: [111, 84, 255, 350],
+	oscToggleOn: "/ai",
+	oscToggleOff: "/manual",
+	fireOSCOnToggleOff: "true"
+}
+]}
