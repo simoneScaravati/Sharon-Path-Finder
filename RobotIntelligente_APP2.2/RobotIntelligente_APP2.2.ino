@@ -280,6 +280,7 @@ void destraComposite(int angle) {
   modalita=3;
   giroS=giroD=0;
   while(giroD< angle){
+      ESP.wdtFeed();
       avantiDestra();
     }
   stopp();
@@ -289,6 +290,7 @@ void sinistraComposite(int angle) {
    modalita=4;
    giroS=giroD=0;
    while(giroS< angle){
+        ESP.wdtFeed();
         avantiSinistra();
       }
     stopp();

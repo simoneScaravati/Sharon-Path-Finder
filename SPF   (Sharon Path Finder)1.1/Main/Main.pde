@@ -147,7 +147,7 @@ void draw() {
       line((reset.getPosX()+ reset.getX()+50), 0 ,(reset.getPosX()+ reset.getX()+50),height);
       textAlign(LEFT); 
       textSize(16);  //copyright text
-      text("You can start drawing your route up here!\n(Sharon will go forward considering Points from bottom to the top) ",
+      text("You can start drawing your route up here!\n(Sharon will go forward considering Points from LEFT to RIGHT) ",
       (reset.getPosX()+ reset.getX()+70) , (height-(height/20)));
    
        
