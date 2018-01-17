@@ -10,6 +10,7 @@ Sharon is a robot car, that is able to self-tune its motors for moving exactly s
 #### Library used:
 * https://github.com/CNMAT/OSC  //osc protocol
 * https://playground.arduino.cc/Code/NewPing  //library for distance sensor
+* Inside Processing: go to library manager and download NetP5 and OscP5
 
 ## Using AndrOSC
 This is the link to the repository: https://github.com/ahmetkizilay/AndrOSC
