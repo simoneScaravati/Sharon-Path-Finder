@@ -28,12 +28,14 @@ int maxDistanzaSchermo= 1200;
 int maxGiri=50;
 
 boolean mod=false;
-//int angoli[100];
-//int distanze[100];
 
-
-boolean receivedRoute= false;
+//boolean receivedRoute= false;
 int lungArray;
+int angle;
+int distance;
+int distanzaGiri;
+int angoloGiri;
+boolean checkDist=false;
 
 /*const String ssid="OnePlus 5T";
 const String pass="12345678";*/
@@ -50,7 +52,6 @@ const String pass="ciaonoah123";*/
 const byte MAX_MSG_SIZE PROGMEM=10000;
 byte packetBuffer[MAX_MSG_SIZE];  //buffer to hold incoming udp packet
 WiFiUDP Udp;
-
 
 void setup() {
 Serial.begin(115200);
@@ -131,6 +132,8 @@ void loop() {
   
 }
 
+
+
 void calibrate(){
   if(modalita==1 || modalita== 5){
       if (giroS>giroD){
@@ -157,6 +160,20 @@ void calibrate(){
         Serial.print(",");
         Serial.println(powerD);
     }
+}
+
+boolean sonarDistanceCheck(){
+  dist = sonar.ping_cm();
+  
+  if(dist<15 && dist!=0) {
+    //modalita=0;
+    //stopp();
+    Serial.println("WARNING, ostacolo rilevato, interruzione della marcia...");
+    return true;
+  }else{
+    return false;
+  }
+  
 }
 
 void receiveOSC() {
@@ -198,29 +215,20 @@ void manual(OSCMessage &messageIN, int addrOffset){
 
 
 void routed(OSCMessage &messageIN, int addrOffset) {
-  
-  /* 
-   *  DA MODIFICARE: IL MESSAGE "/ROUTE" SARÀ SOLO UN SEGNALE ATOMICO
-   *  PER FAR CAPIRE AD ARDUINO CHE DOVRÀ SPACCHETTARE UN BUNDLE 
-   *  NEL QUALE, SE TUTTO VA BENE, CI SARANNO VARI OSC MESSAGE, inizializzati con "/route" CHE RIPORTERANNO DI VOLTA IN
-   *  VOLTA ANGOLO E DISTANZA
-   */
 
   //receivedRoute= true;
   
   lungArray=messageIN.getInt(0);
-
-  int angle;
-  int distance;
-  int distanzaGiri;
-  int angoloGiri;
   Serial.println("Lung. array ");
   Serial.println(lungArray);
-  
-  for(int i=0; i < lungArray; i++){
+  int i=0;
+  while(i < lungArray){
+    /*if(checkDist == true){
+        i= lungArray;
+    }*/
         angle = messageIN.getInt(2*i+1);
         distance = messageIN.getInt(2*i+2);
-        //angoli[i] = angle;
+
         if(angle >= 0){
           angoloGiri= map(angle, 0,180, 1, giri180deg);
           Serial.println("angolo positivo ");
@@ -237,8 +245,7 @@ void routed(OSCMessage &messageIN, int addrOffset) {
           Serial.println(angoloGiri);
           destraComposite(angoloGiri);
         }
-      //distanze[i]= distance;
-      
+
       Serial.println("distanza ");
       Serial.println(distance);
       distanzaGiri= map(distance, 1, maxDistanzaSchermo, 1, maxGiri);  // mapping della distanza con i giri delle route
@@ -246,9 +253,12 @@ void routed(OSCMessage &messageIN, int addrOffset) {
       Serial.println(distanzaGiri);
       avantiComposite(distanzaGiri);
       Serial.println("Ora dovrebbe ritornare all'inizio del loop");
-   }
+      i++;
+  }
   Serial.println("STOP, fine circuito! ");
+  //modalita=0;
   stopp();
+  checkDist = false;
 }
 
 
@@ -266,14 +276,15 @@ void avanti() {
 }
 
 void avantiComposite(int distanzaAvanti) {
-  modalita=5;  
   giroS=giroD=0;
-  while( distanzaAvanti>=giroS || distanzaAvanti>=giroD){
+  while((distanzaAvanti>=giroS || distanzaAvanti>=giroD) /*|| checkDist==false*/){
       ESP.wdtFeed();
+      //checkDist = sonarDistanceCheck();
       avanti();
       calibrate();
     }
   modalita=0;
+  stopp();
 }
 
 void destraComposite(int angle) {
