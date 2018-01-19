@@ -40,10 +40,10 @@ boolean checkDist=false;
 /*const String ssid="OnePlus 5T";
 const String pass="12345678";*/
 
-const String ssid="FASTWEB-1-Scara";
-const String pass="SCARAnet@456";
+/*const String ssid="FASTWEB-1-Scara";
+const String pass="SCARAnet@456";*/
 
-/*const String ssid="noah-HP-15-Notebook-PC";
+const String ssid="noah-HP-15-Notebook-PC";
 const String pass="BJkd9jw4";
 
 /*const String ssid="HUAWEI P8 lite 2017";
@@ -120,18 +120,19 @@ void loop() {
         }
       }
   }
-  switch(modalita){
+  else{
+    switch(modalita){
     case 0: stopp(); break;
     case 1: avanti(); break;
     case 2: indietro(); break;
     case 3: avantiDestra(); break;
     case 4: avantiSinistra(); break;
   }
+  }
 
   calibrate();
   
 }
-
 
 
 void calibrate(){
@@ -222,10 +223,13 @@ void routed(OSCMessage &messageIN, int addrOffset) {
   Serial.println("Lung. array ");
   Serial.println(lungArray);
   int i=0;
+    
   while(i < lungArray){
-    /*if(checkDist == true){
-        i= lungArray;
-    }*/
+    if(checkDist == true){
+        stopp();
+        modalita=0;
+        return;
+    }
         angle = messageIN.getInt(2*i+1);
         distance = messageIN.getInt(2*i+2);
 
@@ -279,7 +283,7 @@ void avantiComposite(int distanzaAvanti) {
   giroS=giroD=0;
   while((distanzaAvanti>=giroS || distanzaAvanti>=giroD) /*|| checkDist==false*/){
       ESP.wdtFeed();
-      //checkDist = sonarDistanceCheck();
+      if (checkDist = sonarDistanceCheck()) break;
       avanti();
       calibrate();
     }
@@ -290,7 +294,7 @@ void avantiComposite(int distanzaAvanti) {
 void destraComposite(int angle) {
   modalita=3;
   giroS=giroD=0;
-  while(giroD< angle){
+  while(giroD < angle || giroS < angle){
       ESP.wdtFeed();
       avantiDestra();
     }
@@ -300,7 +304,7 @@ void destraComposite(int angle) {
 void sinistraComposite(int angle) {
    modalita=4;
    giroS=giroD=0;
-   while(giroS< angle){
+   while(giroS < angle || giroD < angle){
         ESP.wdtFeed();
         avantiSinistra();
       }

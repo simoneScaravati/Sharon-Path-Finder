@@ -159,6 +159,7 @@ void draw() {
           if(mousePressed && (mouseButton == LEFT)){
             punti.clear();
             angoli.clear();
+            distanze.clear();
             background(img);
             cName= 1;
           }
@@ -205,6 +206,7 @@ void draw() {
               
               msg.add(angoli.get(i).intValue());
               msg.add(distanze.get(i).intValue());
+              System.out.println(distanze.get(i).intValue());
             }
             //oscP5.send(bundle, net);
             
@@ -294,6 +296,7 @@ public int getDistance (Point start, Point end){
   float h = -(end.getY()- start.getY());
   h = h>0? h: -h;   // modulo altezza
   distanza= Math.sqrt(Math.pow(b,2)+Math.pow(h,2));
+  System.out.println(distanza);
   return (int)distanza;
   
 }
