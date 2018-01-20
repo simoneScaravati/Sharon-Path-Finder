@@ -40,10 +40,10 @@ boolean checkDist=false;
 /*const String ssid="OnePlus 5T";
 const String pass="12345678";*/
 
-/*const String ssid="FASTWEB-1-Scara";
-const String pass="SCARAnet@456";*/
+const String ssid="FASTWEB-1-Scara";
+const String pass="SCARAnet@456";
 
-const String ssid="noah-HP-15-Notebook-PC";
+/*const String ssid="noah-HP-15-Notebook-PC";
 const String pass="BJkd9jw4";
 
 /*const String ssid="HUAWEI P8 lite 2017";
