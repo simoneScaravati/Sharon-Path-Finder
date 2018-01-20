@@ -28,6 +28,7 @@ PImage logo, title;
 static int state=0;
 int i=0, j=255;
 
+
 void setup(){
   frameRate(30);
   img = loadImage("x.jpg");
@@ -306,4 +307,6 @@ public void keyPressed(){
     state++;
     delay(100);
   }
+  
+  
 }
