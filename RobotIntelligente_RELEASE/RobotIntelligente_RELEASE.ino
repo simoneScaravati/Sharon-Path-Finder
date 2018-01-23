@@ -29,7 +29,6 @@ int maxGiri=50;
 
 boolean mod=false;
 
-//boolean receivedRoute= false;
 int lungArray;
 int angle;
 int distance;
@@ -37,14 +36,14 @@ int distanzaGiri;
 int angoloGiri;
 boolean checkDist=false;
 
-/*const String ssid="OnePlus 5T";
-const String pass="12345678";*/
 
-/*const String ssid="FASTWEB-1-Scara";
-const String pass="SCARAnet@456";*/
+//frequently used wifi ssid and passwords
 
-const String ssid="noah-HP-15-Notebook-PC";
-const String pass="BJkd9jw4";
+const String ssid="FASTWEB-1-Scara";
+const String pass="SCARAnet@456";
+
+/*const String ssid="noah-HP-15-Notebook-PC";
+const String pass="BJkd9jw4";*/
 
 /*const String ssid="P8 lite 2017 Simo";
 const String pass="ciaostebo7";*/
@@ -73,28 +72,26 @@ WiFi.mode(WIFI_STA);
 WiFi.begin(ssid.c_str(), pass.c_str());
 
 Serial.print("Connecting...");
+
 while (WiFi.status() != WL_CONNECTED) {
+    Serial.print("."); 
     delay(500);
-    Serial.print(".");
 }
 Serial.println();
 
 Serial.print("Connected, IP address: ");
 Serial.println(WiFi.localIP());
-// ...fin qui
 
-//setup ethernet part
+//setup ethernet port
 Udp.begin(8000); // porta default OSC
 
 }
 
 void girS(){
-  //Serial.println("giroS");
   giroS++;
   }
   
 void girD(){
-  //Serial.println("giroD");
   giroD++;
   }
 
@@ -168,10 +165,7 @@ void calibrate(){
 
 boolean sonarDistanceCheck(){
   dist = sonar.ping_cm();
-  
   if(dist<15 && dist!=0) {
-    //modalita=0;
-    //stopp();
     Serial.println("WARNING, ostacolo rilevato, interruzione della marcia...");
     return true;
   }else{
@@ -189,9 +183,7 @@ void receiveOSC() {
         messageIN.fill(packetBuffer,size);
         
         if(!messageIN.hasError()) {
-            //Serial.println("----------->  no error");
-            //Serial.println();
-            //messageIN.send(Serial);
+            
             if(mod == false){
               messageIN.route("/UP", avanti);
               messageIN.route("/DOWN", indietro);
@@ -209,10 +201,12 @@ void receiveOSC() {
 }
 
 void AI(OSCMessage &messageIN, int addrOffset){
+  Serial.println("Automatic mode");
   mod= true;
 }
 
 void manual(OSCMessage &messageIN, int addrOffset){
+  Serial.println("Manual mode");
   mod= false;
   stopp();
 }
@@ -220,15 +214,14 @@ void manual(OSCMessage &messageIN, int addrOffset){
 
 void routed(OSCMessage &messageIN, int addrOffset) {
 
-  //receivedRoute= true;
-  
+  Serial.println("Route path received");  
   lungArray=messageIN.getInt(0);
   Serial.println("Lung. array ");
   Serial.println(lungArray);
   int i=0;
     
-  while(i < lungArray){
-   /* if(checkDist == true){
+  while(i < lungArray){    
+   /* if(checkDist == true){      //condition for enable distance sensor
         stopp();
         modalita=0;
         return;
@@ -267,7 +260,6 @@ void routed(OSCMessage &messageIN, int addrOffset) {
       /*Serial.println("distanzagiri ");
       Serial.println(distanzaGiri);*/
       avantiComposite(distanzaGiri);
-      //Serial.println("Ora dovrebbe ritornare all'inizio del loop");
       i++;
   }
   Serial.println("STOP, fine circuito! ");
@@ -278,6 +270,7 @@ void routed(OSCMessage &messageIN, int addrOffset) {
 
 
 void avanti(OSCMessage &messageIN, int addrOffset) {
+  Serial.println("UP");
   modalita=1; 
   giroS=giroD=0;
 }
@@ -292,13 +285,9 @@ void avanti() {
 
 void avantiComposite(int distanzaAvanti) {
   giroS=giroD=0;
-  while((distanzaAvanti>=giroS || distanzaAvanti>=giroD) /*|| checkDist==false*/){
-      /*Serial.print("Giro s: ");
-      Serial.println(giroS);
-      Serial.print("Giro d: ");
-      Serial.println(giroD);*/
+  while((distanzaAvanti>=giroS || distanzaAvanti>=giroD)){
       ESP.wdtFeed();
-     /* if (checkDist = sonarDistanceCheck()) break;*/
+     /* if (checkDist = sonarDistanceCheck()) break;*/    //condition for distance sensor
       avanti();
       calibrate();
     }
@@ -328,6 +317,7 @@ void sinistraComposite(int angle) {
 
 
 void indietro(OSCMessage &messageIN, int addrOffset) {
+  Serial.println("DOWN");
   modalita= 2;
 }
 void indietro() {
@@ -340,6 +330,7 @@ void indietro() {
 }
 
 void avantiDestra(OSCMessage &messageIN, int addrOffset) {
+  Serial.println("RIGHT");
   modalita=3;
 }
 void avantiDestra() {
@@ -353,15 +344,10 @@ void avantiDestra() {
 
 
 void avantiSinistra(OSCMessage &messageIN, int addrOffset) {
+  Serial.println("LEFT");
   modalita=4;
 }
 void avantiSinistra() {
-  /*analogWrite(speedpin, 0);//input a value to set the speed
-  digitalWrite(pinI2,LOW);
-  digitalWrite(pinI1,LOW);
-  analogWrite(speedpin1,1023);//input a value to set the speed
-  digitalWrite(pinI4,LOW);
-  digitalWrite(pinI3,HIGH);*/
   analogWrite(speedpin,1023);//input a value to set the speed
   digitalWrite(pinI2,HIGH);
   digitalWrite(pinI1,LOW);
@@ -372,6 +358,7 @@ void avantiSinistra() {
 
 
 void stopp(OSCMessage &messageIN, int addrOffset) {
+  Serial.println("STOP");
   modalita=0;
 }
 void stopp() {
