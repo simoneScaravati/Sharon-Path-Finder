@@ -39,11 +39,11 @@ boolean checkDist=false;
 
 //frequently used wifi ssid and passwords
 
-const String ssid="FASTWEB-1-Scara";
-const String pass="SCARAnet@456";
+//const String ssid="FASTWEB-1-Scara";
+//const String pass="SCARAnet@456";
 
-/*const String ssid="noah-HP-15-Notebook-PC";
-const String pass="BJkd9jw4";*/
+const String ssid="noah-HP-15-Notebook-PC";
+const String pass="BJkd9jw4";
 
 /*const String ssid="P8 lite 2017 Simo";
 const String pass="ciaostebo7";*/
@@ -105,18 +105,20 @@ void loop() {
         avanti();
       } 
       if(dist<15 && dist!=0) {
-        avantiDestra();
-        delay(850);
+        destraComposite(4);
+        /*delay(850);
         stopp();
-        delay(5);
+        delay(5);*/
         dist=sonar.ping_cm();
-        avantiSinistra();
-        delay(1700);
+        //avantiSinistra();
+        sinistraComposite(8);
+        /*delay(1700);
         stopp();
-        delay(5);
+        delay(5);*/
         if((dist>sonar.ping_cm() && sonar.ping_cm()!=0) || (dist==0 && sonar.ping_cm()!=0)) {
-          avantiDestra();
-          delay(1700);
+          /*avantiDestra();
+          delay(1700);*/
+          destraComposite(8);
         }
       }
   }
@@ -298,7 +300,7 @@ void avantiComposite(int distanzaAvanti) {
 void destraComposite(int angle) {
   modalita=3;
   giroS=giroD=0;
-  while(giroD < angle || giroS < angle){
+  while(/*giroD < angle || giroS < angle*/ giroS+giroD<2*angle){
       ESP.wdtFeed();
       avantiDestra();
     }
@@ -308,7 +310,7 @@ void destraComposite(int angle) {
 void sinistraComposite(int angle) {
    modalita=4;
    giroS=giroD=0;
-   while(giroS < angle || giroD < angle){
+   while(/*giroD < angle || giroS < angle*/ giroS+giroD<2*angle){
         ESP.wdtFeed();
         avantiSinistra();
       }
